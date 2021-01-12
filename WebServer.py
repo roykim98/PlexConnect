@@ -392,7 +392,7 @@ if __name__=="__main__":
     param['CSettings'] = cfg
     param['CATVSettings'] = ATVSettings.CATVSettings(CONFIG_PATH)
     
-    param['IP_self'] = '192.168.178.20'  # IP_self?
+    param['IP_self'] = os.getenv("IP_SELF", "192.168.1.18")
     param['baseURL'] = 'http://'+ param['IP_self'] +':'+ cfg.getSetting('port_webserver')
     param['HostToIntercept'] = cfg.getSetting('hosttointercept')
 
