@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  dns:
+    image: plexconnect_dns
+    build:
+      context: .
+      dockerfile: Dockerfile.dns
+    container_name: plexconnect_dns
+    # restart: always
+    ports:
+      - '192.168.1.18:53:53/udp'
+      - '192.168.1.18:53:53/tcp'
+  webserver:
+    image: plexconnect_webserver
+    build:
+      context: .
+      dockerfile: Dockerfile.webserver
+    container_name: plexconnect_webserver
+    # restart: always
+    ports:
+      - '80:80'
+  webserver_ssl:
+    image: plexconnect_webserver
+    build:
+      context: .
+      dockerfile: Dockerfile.webserver
+    command: SSL
+    container_name: plexconnect_webserver_ssl
+    # restart: always
+    ports:
+      - '443:443'
+
