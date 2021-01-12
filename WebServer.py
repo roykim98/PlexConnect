@@ -33,8 +33,7 @@ import re
 import Localize
 import Subtitle
 
-
-
+CONFIG_PATH = "."
 g_param = {}
 def setParams(param):
     global g_param
@@ -388,10 +387,10 @@ def Run_SSL(cmdPipe, param):
 if __name__=="__main__":
     cmdPipe = Pipe()
     
-    cfg = Settings.CSettings()
+    cfg = Settings.CSettings(CONFIG_PATH)
     param = {}
     param['CSettings'] = cfg
-    param['CATVSettings'] = ATVSettings.CATVSettings()
+    param['CATVSettings'] = ATVSettings.CATVSettings(CONFIG_PATH)
     
     param['IP_self'] = '192.168.178.20'  # IP_self?
     param['baseURL'] = 'http://'+ param['IP_self'] +':'+ cfg.getSetting('port_webserver')

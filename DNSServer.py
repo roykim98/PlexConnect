@@ -76,7 +76,7 @@ import signal
 import Settings
 from Debug import *  # dprint()
 
-
+CONFIG_PATH = "."
 
 """
  Hostname/DNS conversion
@@ -446,7 +446,7 @@ def Run(cmdPipe, param):
 if __name__ == '__main__':
     cmdPipe = Pipe()
     
-    cfg = Settings.CSettings()
+    cfg = Settings.CSettings(CONFIG_PATH)
     param = {}
     param['CSettings'] = cfg
     
