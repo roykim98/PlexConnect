@@ -217,7 +217,7 @@ def XML_PMS2aTV(PMS_address, path, options):
     
     elif cmd=='PlayTrailer':
         trailerID = options['PlexConnectTrailerID']
-        info = urllib2.urlopen("https://youtube.com/get_video_info?video_id=" + trailerID).read()
+        info = urllib2.urlopen("https://youtube.com/get_video_info?html5=1&video_id=" + trailerID).read()
         parsed = urlparse.parse_qs(info)
         
         key = 'player_response'
@@ -351,6 +351,10 @@ def XML_PMS2aTV(PMS_address, path, options):
     elif cmd=='Plex_Movie':
         dprint(__name__, 1, "Found Plex_Movie")
         dir = 'Movie'
+        cmd = 'NavigationBar'
+    elif cmd=='Plex_TV_Series':
+        dprint(__name__, 1, "Found Plex_TV_Series")
+        dir = 'TVShow'
         cmd = 'NavigationBar'
     elif cmd.find('Scanner') != -1:
         dprint(__name__, 1, "Found Scanner.")
@@ -969,7 +973,7 @@ class CCommandCollection(CCommandHelper):
         # Video Codec
         if vCodec != '' and self.options['aTVFirmwareVersion'] >= '7.0':
             if vCodec == 'mpeg4':
-                vCodec = "XVID" # Are there any other mpeg4-part 2 codecs?
+                vCodec = 'xvid' # Are there any other mpeg4-part 2 codecs?
             attribs['insertIndex'] = str(index)
             attribs['src'] = g_param['baseURL'] + '/thumbnails/MediaBadges/' + vCodec + '.png'
             urlBadge = etree.SubElement(additionalBadges, "urlBadge", attribs)

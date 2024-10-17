@@ -295,7 +295,7 @@ def discoverPMS(ATV_udid, CSettings, IP_self, tokenDict={}):
         updatePMSProperty(ATV_udid, uuid, 'enableGzip', enableGzip)
     
     # debug print all servers
-    dprint(__name__, 0, "Plex Media Servers found: {0}", len(g_PMS[ATV_udid])-1)
+    dprint(__name__, 0, "ATV ["+ATV_udid+"] Plex Media Servers found: {0}", len(g_PMS[ATV_udid])-1)
     for uuid in g_PMS[ATV_udid]:
         dprint(__name__, 1, str(g_PMS[ATV_udid][uuid]))
 
@@ -310,7 +310,7 @@ poke every PMS at every given address (plex.tv tends to cache a LOT...)
 """
 def getPMSListFromMyPlex(ATV_udid, authtoken):
     dprint(__name__, 0, "***")
-    dprint(__name__, 0, "poke plex.tv - request Plex Media Server list")
+    dprint(__name__, 0, "ATV ["+ATV_udid+"] poke for plex.tv - request Plex Media Server list")
     dprint(__name__, 0, "***")
     
     XML = getXMLFromPMS('https://plex.tv', '/api/resources?includeHttps=1', {}, authtoken)
@@ -342,14 +342,17 @@ def getPMSListFromMyPlex(ATV_udid, authtoken):
                     uri = Con.get('uri')
                     local = Con.get('local')
                     
-                    dprint(__name__, 0, "poke {0} ({1}) at {2}", name, uuid, uri)
-                    
+                    # change protocol and uri if in local
+                    if local == "1":
+                        protocol = "http"
+                        uri = protocol + "://" + ip + ":" + port
+                                        
                     # poke PMS, own thread for each poke
                     PMSInfo = { 'uuid': uuid, 'name': name, 'token': token, 'owned': owned, 'local': local, \
                             'protocol': protocol, 'ip': ip, 'port': port, 'uri': uri }
                     PMS = { 'baseURL': uri, 'path': '/', 'options': None, 'token': token, \
                             'data': PMSInfo }
-                    
+                    dprint(__name__, 0, "poke {0} ({1}) at {2}", name, uuid, uri)
                     t = Thread(target=getXMLFromPMSToQueue, args=(PMS, queue))
                     t.start()
                     threads.append(t)
@@ -722,13 +725,13 @@ def MyPlexSignIn(username, password, options):
 def MyPlexSignOut(authtoken):
     # MyPlex web address
     MyPlexHost = 'plex.tv'
-    MyPlexSignOutPath = '/users/sign_out.xml'
+    MyPlexSignOutPath = '/api/v2/users/signout'
     MyPlexURL = 'http://' + MyPlexHost + MyPlexSignOutPath
     
     # create POST request
     xargs = { 'X-Plex-Token': authtoken }
     request = urllib2.Request(MyPlexURL, None, xargs)
-    request.get_method = lambda: 'POST'  # turn into 'POST' - done automatically with data!=None. But we don't have data.
+    request.get_method = lambda: 'DELETE'  # turn into 'DELETE' - done automatically with data!=None. But we don't have data.
     
     response = urllib2.urlopen(request).read()
     
@@ -877,10 +880,6 @@ def getTranscodeImagePath(key, AuthToken, path, width, height):
         path = 'http://127.0.0.1:32400' + path + '/' + key
     path = path.encode('utf8')
     
-    # This is bogus (note the extra path component) but ATV is stupid when it comes to caching images, it doesn't use querystrings.
-    # Fortunately PMS is lenient...
-    transcodePath = '/photo/:/transcode/' +str(width)+'x'+str(height)+ '/' + quote_plus(path)
-    
     args = dict()
     args['width'] = width
     args['height'] = height
@@ -889,7 +888,8 @@ def getTranscodeImagePath(key, AuthToken, path, width, height):
     if not AuthToken=='':
         args['X-Plex-Token'] = AuthToken
     
-    return transcodePath + '?' + urlencode(args)
+    # ATV's cache ignores query strings, it does not ignore fragments though, so append the query as fragment as well.
+    return '/photo/:/transcode' + '?' + urlencode(args) + '#' + urlencode(args)
 
 
 
